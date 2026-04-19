@@ -48,5 +48,59 @@ BEGIN
 END$$
 
 
+-- =============================================
+-- TRIGGER 3
+-- Automatically create a review request when booking is completed
+-- =============================================
+CREATE TRIGGER create_review_request_after_completion
+AFTER UPDATE ON bookings
+FOR EACH ROW
+BEGIN
+    IF NEW.status = 'completed' AND OLD.status <> 'completed' THEN
+        INSERT IGNORE INTO review_requests (
+            booking_id,
+            employer_id,
+            tradesperson_id,
+            status
+        )
+        VALUES (
+            NEW.booking_id,
+            NEW.user_id,
+            NEW.tradesperson_id,
+            'pending'
+        );
+    END IF;
+END$$
+
+-- =============================================
+-- TRIGGER 4
+-- When a review is inserted, mark request submitted
+-- =============================================
+CREATE TRIGGER mark_review_request_submitted
+AFTER INSERT ON reviews
+FOR EACH ROW
+BEGIN
+    UPDATE review_requests
+    SET status = 'submitted',
+        submitted_at = CURRENT_TIMESTAMP
+    WHERE booking_id = NEW.booking_id;
+END$$
+
+-- =============================================
+-- TRIGGER 5
+-- Recalculate avg rating after a new review
+-- =============================================
+CREATE TRIGGER update_avg_rating_after_review
+AFTER INSERT ON reviews
+FOR EACH ROW
+BEGIN
+    UPDATE tradespeople t
+    SET avg_rating = (
+        SELECT ROUND(AVG(r.rating), 2)
+        FROM reviews r
+        WHERE r.tradesperson_id = NEW.tradesperson_id
+    )
+    WHERE t.tradesperson_id = NEW.tradesperson_id;
+END$$
 
 DELIMITER ;
