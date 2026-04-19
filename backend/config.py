@@ -20,6 +20,6 @@ class Config:
    #MySQl username 
     DB_USER = os.getenv('DB_USER','root')
   #MySql password
-    DB_PASSWORD = os.getenv('DB-PASSWORD','')
+    DB_PASSWORD = os.getenv('DB-PASSWORD','Oli35563471!')
 # Mysql  name
-    DB_name = os.getenv('DB_NAME', 'freelancer_db')
+    DB_NAME = os.getenv('DB_NAME', 'freelancer_db')

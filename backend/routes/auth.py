@@ -27,10 +27,10 @@ def get_db():
 @auth.route('/register', methods=['POST'])
 #front sends POST to /api/auth/register
 def register():
-    data = request.get_json()
+    data = request.get_json(force=True)
     # reads the JSON data from the frontEnd 
 
-    username = data.get('username')
+    user_name = data.get('user_name')
     # gets username from the request data
 
     password = data.get('password')
@@ -38,8 +38,12 @@ def register():
 
     email = data.get('email')
     # gets email from the request data
+    first_name = data.get('first_name')
+    #get first_name from the request data 
+    last_name = data.get('last_name')
+    #get last_name  from the request data
 
-    if not username or not password or not email:
+    if not user_name or not password or not email:
         # check if any required field is missing
         return jsonify({'error': 'All fields required'}), 400
 
@@ -49,18 +53,18 @@ def register():
     cursor = db.cursor()
     # cursor needed to execute SQL queries
 
-    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+    cursor.execute("SELECT * FROM users WHERE user_name = %s", (user_name,))
     # raw SQL — checks if username already exists in database
 
     if cursor.fetchone():
         # fetchone() gets the first result - if something comes back username is taken
-        return jsonify({'error': 'Username already exists'}), 400
+        return jsonify({'error': 'User_name already exists'}), 400
 
     cursor.execute(
-        "INSERT INTO users (username, password, email) VALUES (%s, %s, %s)",
-        (username, password, email)
-        # raw SQL INSERT — adds new user to the database
-    )
+    "INSERT INTO users (first_name, last_name, user_name, password, email) VALUES (%s, %s, %s, %s, %s)",
+    (first_name, last_name, user_name, password, email)
+
+)
 
     db.commit()
     # saving changes to the database - without this nothing gets saved
@@ -78,7 +82,7 @@ def login():
     data = request.get_json()
     # reads login form data from frontend
 
-    username = data.get('username')
+    user_name = data.get('user_name')
     # gets username from request data
 
     password = data.get('password')
@@ -91,8 +95,8 @@ def login():
     # cursor needed to execute SQL queries
 
     cursor.execute(
-        "SELECT * FROM users WHERE username = %s AND password = %s",
-        (username, password)
+        "SELECT * FROM users WHERE user_name = %s AND password = %s",
+        (user_name, password)
         # raw SQL — finds user where username AND password both match
     )
 
