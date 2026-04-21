@@ -6,6 +6,8 @@ from flask import Flask, jsonify
 # reads .env file so Flask can use secret settings
 from dotenv import load_dotenv
 
+from routes.reviews import reviews 
+
 # lets Python read environment variables
 import os
 
@@ -40,3 +42,4 @@ if __name__ == '__main__':
     # starts server when you run "python app.py"
     # debug=True = server restarts automatically when you change code
 
+app.register_blueprint(reviews , url_prefix= '/api/reviews')
