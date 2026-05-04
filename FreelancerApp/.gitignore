@@ -1,0 +1,17 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/.env
+backend/**/__pycache__/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+
+# DB credentials
+.env
+*.sql.bak
+
+# Mac
+.DS_Store
