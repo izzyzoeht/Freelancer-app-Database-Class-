@@ -2,28 +2,25 @@
 from flask import Flask, jsonify
 # Flask = creates your app
 
-
-# reads .env file so Flask can use secret settings
 from dotenv import load_dotenv
+# reads .env file so Flask can use secret settings
 
-from routes.reviews import reviews 
-
-# lets Python read environment variables
 import os
+# lets Python read environment variables
 
 load_dotenv()
 # loads the .env file — must be called before anything else
 
 app = Flask(__name__)
 # creates your Flask application
-# __name__ tells Flask where your app lives
 
 app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key')
 # sets secret key for sessions — login system needs this
 
-# import and register blueprints
+# import and register all blueprints
 from routes.auth import auth
-# imports the auth Blueprint from routes/auth.py
+from routes.reviews import reviews
+from routes.notifications import notifications
 
 app.register_blueprint(auth, url_prefix='/api/auth')
 # registers the auth Blueprint with Flask
@@ -31,6 +28,9 @@ app.register_blueprint(auth, url_prefix='/api/auth')
 # so /register becomes /api/auth/register
 # so /login becomes /api/auth/login
 # so /logout becomes /api/auth/logout
+app.register_blueprint(reviews , url_prefix= '/api/reviews')
+app.register_blueprint(notifications , url_prefix='/api/notifications')
+
 
 @app.route('/')
 def home():
@@ -42,4 +42,4 @@ if __name__ == '__main__':
     # starts server when you run "python app.py"
     # debug=True = server restarts automatically when you change code
 
-app.register_blueprint(reviews , url_prefix= '/api/reviews')
+

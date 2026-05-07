@@ -52,7 +52,7 @@ def send_notification():
     db.close()
 
     return jsonify({'message': 'Notification sent successfully'}), 201
-@notifications.routes('/user/<int:user_id>', methods=['GET'])
+@notifications.route('/user/<int:user_id>', methods=['GET'])
 # frontend sends GET to /api/notification/user/123
 
 def get_notfications(user_id):

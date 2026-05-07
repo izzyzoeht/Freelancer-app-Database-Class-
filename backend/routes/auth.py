@@ -7,6 +7,8 @@ from flask import Blueprint, request, jsonify, session
 import mysql.connector
 # connect MySQL database with raw SQL
 
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from config import Config 
 # importing our settings from config.py
 
@@ -30,9 +32,6 @@ def register():
     data = request.get_json(force=True)
     # reads the JSON data from the frontEnd 
 
-    user_name = data.get('user_name')
-    # gets username from the request data
-
     password = data.get('password')
     # gets password from the request data
 
@@ -42,28 +41,36 @@ def register():
     #get first_name from the request data 
     last_name = data.get('last_name')
     #get last_name  from the request data
+    phone = data.get('phone')
 
-    if not user_name or not password or not email:
+    user_type = data.get('user_type','employer')
+
+    if not first_name or not last_name or not password or not email:
         # check if any required field is missing
         return jsonify({'error': 'All fields required'}), 400
 
+
+
+    password_hash = generate_password_hash(password)
+    #hash plain text passord 
     db = get_db()
     # creating database connection
 
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)
     # cursor needed to execute SQL queries
 
-    cursor.execute("SELECT * FROM users WHERE user_name = %s", (user_name,))
+    cursor.execute("SELECT * FROM users WHERE email =%s",(email,))
     # raw SQL — checks if username already exists in database
 
     if cursor.fetchone():
         # fetchone() gets the first result - if something comes back username is taken
+        cursor.close()
+        db.close()
         return jsonify({'error': 'User_name already exists'}), 400
 
     cursor.execute(
-    "INSERT INTO users (first_name, last_name, user_name, password, email) VALUES (%s, %s, %s, %s, %s)",
-    (first_name, last_name, user_name, password, email)
-
+    "INSERT INTO users (first_name, last_name, email, password_hash, phone, user_type) VALUES (%s, %s, %s, %s, %s, %s)",
+    (first_name, last_name, email, password_hash, phone, user_type)
 )
 
     db.commit()
@@ -82,24 +89,25 @@ def login():
     data = request.get_json()
     # reads login form data from frontend
 
-    user_name = data.get('user_name')
+    email = data.get('email')
     # gets username from request data
 
     password = data.get('password')
     # gets password from request data
 
+    if not email or not password : 
+        #check if any required field is missing
+        return jsonify({'error': 'All fields required'}), 400
+
     db = get_db()
     # creating database connection
 
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)
     # cursor needed to execute SQL queries
-
     cursor.execute(
-        "SELECT * FROM users WHERE user_name = %s AND password = %s",
-        (user_name, password)
-        # raw SQL — finds user where username AND password both match
+        "SELECT * FROM users WHERE email = %s",
+        (email,)
     )
-
     user = cursor.fetchone()
     # gets the matching user from database — None if not found
 
@@ -107,13 +115,20 @@ def login():
     db.close()
     # close the connection - to free up database resources
 
-    if user:
+    if user and check_password_hash(user['password_hash'],password):
         # user exists and password matches
-        session['user_id'] = user[0]
+        session.clear()
+        session['user_id'] = user['user_id']
         # stores user ID in session — remembers they are logged in
-        return jsonify({'message': 'Login successful'}), 200
+        session['user_type'] = user['user_type']
+        return jsonify({
+            'message': 'Login successful',
+            'user_id': user['user_id'],
+            'user_type': user['user_type'],
+            'first_name': user['first_name']
+        }), 200
     else:
-        return jsonify({'error': 'Invalid username or password'}), 401
+        return jsonify({'error': 'Invalid email or password'}),401
         # 401 = unauthorized — wrong credentials
 
 @auth.route('/logout', methods=['POST'])
