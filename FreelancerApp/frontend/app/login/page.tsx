@@ -53,7 +53,7 @@ function LoginForm() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-lg bg-navy/60 border border-white/10 text-white placeholder-white/20 focus:border-teal focus:outline-none transition-colors text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-navy/60 border border-white/10 placeholder-white/20 focus:border-teal focus:outline-none transition-colors text-sm"
               />
             </div>
 
@@ -65,7 +65,7 @@ function LoginForm() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-lg bg-navy/60 border border-white/10 text-white placeholder-white/20 focus:border-teal focus:outline-none transition-colors text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-navy/60 border border-white/10 placeholder-white/20 focus:border-teal focus:outline-none transition-colors text-sm"
               />
             </div>
 
