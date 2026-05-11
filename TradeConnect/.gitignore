@@ -1,0 +1,141 @@
+# ================================
+# TradeConnect .gitignore
+# Root file for Next.js frontend + Flask/Python backend
+# ================================
+
+# ---------- Environment variables / secrets ----------
+.env
+.env.*
+!.env.example
+!.env.sample
+backend/.env
+backend/.env.*
+frontend/.env.local
+frontend/.env*.local
+
+# ---------- Python / Flask backend ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+backend/venv/
+backend/.venv/
+
+# Flask runtime files
+instance/
+.webassets-cache
+*.log
+
+# Python packaging/build files
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ---------- Database / local data ----------
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.bak
+*.backup
+
+# Keep SQL source files tracked unless they contain secrets
+# database/*.sql is intentionally NOT ignored
+
+# ---------- Node / Next.js frontend ----------
+node_modules/
+frontend/node_modules/
+
+.next/
+frontend/.next/
+out/
+frontend/out/
+build/
+frontend/build/
+dist/
+frontend/dist/
+
+# Next.js generated files
+.next/cache/
+frontend/.next/cache/
+
+# Package manager caches/logs
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript cache
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------- Testing / coverage ----------
+coverage/
+frontend/coverage/
+backend/coverage/
+.nyc_output/
+
+# ---------- IDE / editor files ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# ---------- macOS / Windows junk ----------
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+__MACOSX/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---------- Temporary files ----------
+*.tmp
+*.temp
+*.pid
+*.seed
+*.pid.lock
+.cache/
+tmp/
+temp/
+
+# ---------- Uploaded/generated media ----------
+uploads/
+backend/uploads/
+frontend/uploads/
+
+# ---------- Docker / local override files ----------
+.dockerignore.local
+docker-compose.override.yml
+
+# ---------- Deployment artifacts ----------
+.vercel/
+.netlify/
