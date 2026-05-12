@@ -2,7 +2,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - "5000:5000"
+      - "5001:5001"
     environment:
       - FLASK_ENV=development
       - SECRET_KEY=${SECRET_KEY}
@@ -10,9 +10,17 @@ services:
       - DB_USER=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
       - DB_NAME=${MYSQL_DATABASE}
+      - FRONTEND_URL=http://localhost:3000
     depends_on:
       - database
-
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5001
+    depends_on:
+      - backend
   database:
     image: mysql:8.0
     environment:
