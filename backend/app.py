@@ -36,7 +36,8 @@ def home():
     # confirms server is working
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
     # starts server when you run "python app.py"
     # debug=True = server restarts automatically when you change code
+
 
