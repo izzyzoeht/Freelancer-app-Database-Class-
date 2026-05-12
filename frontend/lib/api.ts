@@ -16,7 +16,7 @@ import type {
   UploadedDocument,
 } from '@/types'
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+const BASE = ''
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = options.body instanceof FormData
