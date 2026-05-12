@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, session
+from werkzeug.security import generate_password_hash, check_password_hash
 from routes._helpers import get_db
 
 auth = Blueprint('auth', __name__)
@@ -37,11 +38,14 @@ def register():
         cursor.close(); db.close()
         return jsonify({'error': 'Email already registered'}), 400
 
+    # Hash the password before storing
+    password_hash = generate_password_hash(password)
+
     cursor.execute(
         """INSERT INTO users
            (first_name, last_name, email, password_hash, user_type, phone, city, state)
            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-        (first_name, last_name, email, password, user_type, phone, city, state),
+        (first_name, last_name, email, password_hash, user_type, phone, city, state),
     )
     db.commit()
     new_user_id = cursor.lastrowid
@@ -88,14 +92,14 @@ def login():
     cursor = db.cursor(dictionary=True)
     cursor.execute(
         """SELECT user_id, first_name, last_name, email, user_type,
-                  phone, address, city, state, zip, is_active, created_at
+                  phone, address, city, state, zip, is_active, created_at, password_hash
            FROM users
-           WHERE email = %s AND password_hash = %s AND is_active = TRUE""",
-        (email, password),
+           WHERE email = %s AND is_active = TRUE""",
+        (email,),
     )
     user = cursor.fetchone()
 
-    if user:
+    if user and check_password_hash(user['password_hash'], password):
         cursor.execute(
             "UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE user_id = %s",
             (user['user_id'],),

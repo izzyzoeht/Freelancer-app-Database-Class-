@@ -10,8 +10,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key')
     app.config.update(
-        SESSION_COOKIE_SAMESITE='Lax',
-        SESSION_COOKIE_SECURE=False,
+        SESSION_COOKIE_SAMESITE='None',
+        SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_HTTPONLY=True,
         MAX_CONTENT_LENGTH=15 * 1024 * 1024,
     )
@@ -76,4 +76,5 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=os.getenv('FLASK_DEBUG', '1') == '1', port=5001)
+    app.run(host='0.0.0.0', debug=os.getenv('FLASK_DEBUG', '1') == '1', port=5001)
+		
