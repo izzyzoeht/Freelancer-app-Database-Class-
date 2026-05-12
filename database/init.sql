@@ -270,9 +270,6 @@ DROP TRIGGER IF EXISTS application_accept_creates_booking;
 DROP TRIGGER IF EXISTS booking_complete_marks_posting_filled;
 DROP TRIGGER IF EXISTS prevent_overlapping_bookings;
 DROP TRIGGER IF EXISTS prevent_overlapping_bookings_update;
-DROP TRIGGER IF EXISTS prevent_out_of_city_booking;
-DROP TRIGGER IF EXISTS prevent_out_of_city_booking_update;
-
 DELIMITER $$
 
 CREATE TRIGGER prevent_junior_booking
@@ -482,54 +479,6 @@ BEGIN
         IF v_clash > 0 THEN
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Tradesperson already has a booking at this time';
-        END IF;
-    END IF;
-END$$
-
--- ─────────────────────────────────────────────────────────────
--- A tradesperson cannot accept a job that is not in their city.
--- Compares the booking's city to the tradesperson's user.city.
--- If either side is NULL we don't block — geography unknown.
--- ─────────────────────────────────────────────────────────────
-CREATE TRIGGER prevent_out_of_city_booking
-BEFORE INSERT ON bookings
-FOR EACH ROW
-BEGIN
-    DECLARE v_tp_city VARCHAR(100);
-
-    IF NEW.city IS NOT NULL THEN
-        SELECT u.city
-          INTO v_tp_city
-          FROM tradespeople t
-          JOIN users u ON u.user_id = t.user_id
-         WHERE t.tradesperson_id = NEW.tradesperson_id;
-
-        IF v_tp_city IS NOT NULL AND v_tp_city <> NEW.city THEN
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Tradesperson cannot accept a job outside their city';
-        END IF;
-    END IF;
-END$$
-
-CREATE TRIGGER prevent_out_of_city_booking_update
-BEFORE UPDATE ON bookings
-FOR EACH ROW
-BEGIN
-    DECLARE v_tp_city VARCHAR(100);
-
-    IF NEW.city IS NOT NULL
-       AND (NEW.tradesperson_id <> OLD.tradesperson_id
-            OR IFNULL(NEW.city,'') <> IFNULL(OLD.city,''))
-    THEN
-        SELECT u.city
-          INTO v_tp_city
-          FROM tradespeople t
-          JOIN users u ON u.user_id = t.user_id
-         WHERE t.tradesperson_id = NEW.tradesperson_id;
-
-        IF v_tp_city IS NOT NULL AND v_tp_city <> NEW.city THEN
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Tradesperson cannot accept a job outside their city';
         END IF;
     END IF;
 END$$
