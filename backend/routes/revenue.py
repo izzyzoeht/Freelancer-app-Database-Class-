@@ -48,33 +48,31 @@ def export_excel():
     # ---- Sheet 1: Monthly Revenue ----
     ws1 = wb.active
     ws1.title = "Monthly Revenue"
-    ws1.append(['Month', 'Number of Payments', 'Total Revenue'])
+    ws1.append([str(row['month']), int(row['num_payments']), float(row['total_revenue'])])
     for row in monthly_data:
-        # Force month to be a string so Excel doesn't try to parse it as a date
-        ws1.append([str(row['month']), int(row['num_payments']), float(row['total_revenue'])])
+        ws1.append([row['month'], row['num_payments'], float(row['total_revenue'])])
 
     ws1.column_dimensions['A'].width = 12
     ws1.column_dimensions['B'].width = 22
     ws1.column_dimensions['C'].width = 18
 
     if monthly_data:
-        n = len(monthly_data)
-
         chart1 = LineChart()
         chart1.title = "Monthly Revenue Trend"
         chart1.y_axis.title = "Revenue ($)"
         chart1.x_axis.title = "Month"
         chart1.width = 18
         chart1.height = 10
-        chart1.legend = None  # only one series, legend is noise
 
-        # Data: ONLY column C (Total Revenue), rows 1 (header) through n+1
-        data = Reference(ws1, min_col=3, max_col=3, min_row=1, max_row=n+1)
+        data = Reference(ws1, min_col=3, min_row=1, max_row=len(monthly_data)+1)
+        cats = Reference(ws1, min_col=1, min_row=2, max_row=len(monthly_data)+1)
         chart1.add_data(data, titles_from_data=True)
-
-        # Categories: column A (Month), rows 2 through n+1 (skip header)
-        cats = Reference(ws1, min_col=1, max_col=1, min_row=2, max_row=n+1)
         chart1.set_categories(cats)
+
+        chart1.x_axis.delete = False
+        chart1.y_axis.delete = False
+        chart1.x_axis.lblAlgn = "ctr"
+        chart1.x_axis.lblOffset = 100
 
         ws1.add_chart(chart1, "F2")
 
@@ -82,27 +80,23 @@ def export_excel():
     ws2 = wb.create_sheet("Revenue by City")
     ws2.append(['City', 'Bookings', 'Revenue'])
     for row in city_data:
-        ws2.append([str(row['city']), int(row['bookings']), float(row['revenue'])])
+        ws2.append([row['city'], row['bookings'], float(row['revenue'])])
 
     ws2.column_dimensions['A'].width = 20
     ws2.column_dimensions['B'].width = 12
     ws2.column_dimensions['C'].width = 14
 
     if city_data:
-        n = len(city_data)
-
         chart2 = BarChart()
         chart2.title = "Revenue by City"
         chart2.y_axis.title = "Revenue ($)"
         chart2.x_axis.title = "City"
         chart2.width = 18
         chart2.height = 10
-        chart2.legend = None
 
-        data = Reference(ws2, min_col=3, max_col=3, min_row=1, max_row=n+1)
+        data = Reference(ws2, min_col=3, min_row=1, max_row=len(city_data)+1)
+        cats = Reference(ws2, min_col=1, min_row=2, max_row=len(city_data)+1)
         chart2.add_data(data, titles_from_data=True)
-
-        cats = Reference(ws2, min_col=1, max_col=1, min_row=2, max_row=n+1)
         chart2.set_categories(cats)
 
         ws2.add_chart(chart2, "F2")
