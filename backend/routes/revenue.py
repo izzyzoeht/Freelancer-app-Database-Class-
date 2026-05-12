@@ -44,7 +44,7 @@ def export_excel():
                COUNT(*) AS num_payments,
                COALESCE(SUM(p.amount), 0) AS total_revenue,
                COALESCE(SUM(pf.fee_amount), 0) AS platform_fees,
-               COUNT(DISTINCT b.employer_id) AS unique_employers,
+               COUNT(DISTINCT b.user_id) AS unique_employers,
                COUNT(DISTINCT b.tradesperson_id) AS unique_tradespeople
         FROM payments p
         JOIN bookings b ON p.booking_id = b.booking_id
@@ -74,17 +74,16 @@ def export_excel():
     # ---- Top tradespeople ----
     cursor.execute("""
         SELECT CONCAT(u.first_name, ' ', u.last_name) AS name,
-               t.trade_type,
+               t.trade_category,
                u.city,
                COUNT(DISTINCT b.booking_id) AS total_bookings,
                COALESCE(SUM(p.amount), 0) AS total_revenue,
-               COALESCE(AVG(r.rating), 0) AS avg_rating
+               COALESCE(t.avg_rating, 0) AS avg_rating
         FROM tradespeople t
         JOIN users u ON t.user_id = u.user_id
         LEFT JOIN bookings b ON b.tradesperson_id = t.tradesperson_id
         LEFT JOIN payments p ON p.booking_id = b.booking_id AND p.status='paid'
-        LEFT JOIN reviews r ON r.tradesperson_id = t.tradesperson_id
-        GROUP BY t.tradesperson_id, name, t.trade_type, u.city
+        GROUP BY t.tradesperson_id, name, t.trade_category, u.city, t.avg_rating
         HAVING total_bookings > 0
         ORDER BY total_revenue DESC
         LIMIT 50
@@ -173,13 +172,13 @@ def export_excel():
     # ---- Sheet 4: Top Tradespeople ----
     ws = wb.create_sheet("Top Tradespeople")
     ws.append([
-        'Name', 'Trade Type', 'City', 'Total Bookings',
+        'Name', 'Trade Category', 'City', 'Total Bookings',
         'Total Revenue', 'Average Rating'
     ])
     for row in top_tradespeople:
         ws.append([
             str(row['name']),
-            str(row['trade_type'] or ''),
+            str(row['trade_category'] or ''),
             str(row['city'] or ''),
             int(row['total_bookings']),
             float(row['total_revenue']),
