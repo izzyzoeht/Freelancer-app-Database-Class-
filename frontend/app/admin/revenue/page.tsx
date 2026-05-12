@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import { revenueApi, type RevenueSummary } from '@/lib/api'
@@ -12,6 +11,9 @@ export default function AdminRevenuePage() {
   const [summary, setSummary] = useState<RevenueSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  // ⬇ ADDED: state for the export button
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState('')
 
   useEffect(() => {
     revenueApi.summary()
@@ -19,6 +21,26 @@ export default function AdminRevenuePage() {
       .catch(e => setError(e instanceof Error ? e.message : 'Failed to load revenue summary'))
       .finally(() => setLoading(false))
   }, [])
+
+  const handleExport = async () => {
+    setExporting(true)
+    setExportError('')
+    try {
+      const blob = await revenueApi.exportReport()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `revenue-report-${new Date().toISOString().split('T')[0]}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : 'Export failed')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const cards = summary ? [
     { label: 'Total Payment Volume', value: money(summary.total_payment_volume) },
@@ -31,10 +53,27 @@ export default function AdminRevenuePage() {
   return (
     <DashboardLayout>
       <div className="p-8 max-w-5xl mx-auto animate-fade-up">
-        <h1 className="font-display text-3xl text-navy mb-1">Revenue Summary</h1>
-        <p className="text-brand-muted mb-8">
-          Platform-wide earnings from service fees and tradesperson subscriptions.
-        </p>
+        {/* ⬇ CHANGED: header is now a flex row with title left, button right */}
+        <div className="flex items-start justify-between mb-8 gap-4">
+          <div>
+            <h1 className="font-display text-3xl text-navy mb-1">Revenue Summary</h1>
+            <p className="text-brand-muted">
+              Platform-wide earnings from service fees and tradesperson subscriptions.
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={handleExport}
+              disabled={exporting || loading || !summary}
+              className="bg-navy text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity whitespace-nowrap"
+            >
+              {exporting ? 'Generating…' : 'Export Report'}
+            </button>
+            {exportError && (
+              <p className="text-xs text-red-600">{exportError}</p>
+            )}
+          </div>
+        </div>
 
         {loading ? (
           <p className="text-brand-muted text-center py-16">Loading…</p>
@@ -50,7 +89,6 @@ export default function AdminRevenuePage() {
                 </div>
               ))}
             </div>
-
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <h2 className="font-display text-xl text-navy mb-4">Revenue Streams</h2>
               <div className="flex flex-col gap-3">

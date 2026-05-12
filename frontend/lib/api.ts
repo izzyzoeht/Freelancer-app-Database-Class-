@@ -203,6 +203,16 @@ export interface RevenueSummary {
 
 export const revenueApi = {
   summary: () => request<RevenueSummary>('/api/revenue/summary'),
+  exportReport: async (): Promise<Blob> => {
+    const response = await fetch('/api/revenue/export', {
+      method: 'GET',
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.status}`)
+    }
+    return response.blob()
+  },
 }
 
 export type EnrichedReview = Review & {
